@@ -1,0 +1,281 @@
+<html lang="ko">
+<head>
+<meta charset="UTF-8"> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>송금대상액 계산기</title>
+
+<meta name="theme-color" content="#9ACD32">
+
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+}
+
+body {
+    background: #f6f7f8;
+    padding: 16px;
+    max-width: 700px;
+    margin: auto;
+}
+
+.card {
+    background: white;
+    border-radius: 18px;
+    padding: 16px;
+    margin-bottom: 14px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.08);
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 16px;
+    color: #4d6b00;
+    font-size: 26px;
+}
+
+.label {
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+#targetAmount {
+    width: 100%;
+    height: 42px;
+    font-size: 22px;
+    padding: 10px;
+    border: 2px solid #cfe58b;
+    border-radius: 12px;
+}
+
+.money-item {
+    display: grid;
+    grid-template-columns: 70px 42px 60px 42px 1fr;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.money-item:last-child {
+    border-bottom: none;
+}
+
+.denom {
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.action-btn {
+    width: 32px;
+    height: 32px;
+    border: none;
+    border-radius: 10px;
+    background: #9ACD32;
+    color: white;
+    font-size: 20px;
+    font-weight: 700;
+    cursor: pointer; /* 클릭 가능한 요소임을 표시 */
+}
+
+.qty {
+    width: 100%;
+    height: 42px;
+    text-align: center;
+    font-size: 18px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+}
+
+.amount {
+    text-align: right;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.summary {
+    text-align: center;
+}
+
+.total {
+    font-size: 34px;
+    font-weight: 800;
+    color: #4d6b00;
+}
+
+.diff {
+    margin-top: 8px;
+    font-size: 18px;
+}
+
+.status {
+    margin-top: 10px;
+    padding: 12px;
+    border-radius: 12px;
+    font-weight: 700;
+}
+
+.match { background: #e8f5d0; color: #4d6b00; }
+.short { background: #fdeaea; color: #c62828; }
+.over { background: #eaf2ff; color: #1565c0; }
+
+.reset-btn {
+    width: 100%;
+    height: 52px;
+    border: none;
+    border-radius: 12px;
+    background: #4d6b00;
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+@media(max-width: 430px) {
+    .money-item {
+        grid-template-columns: 55px 36px 52px 36px 1fr;
+        gap: 4px;
+    }
+    .denom { font-size: 13px; }
+    .amount { font-size: 13px; }
+}
+</style>
+</head>
+
+<body>
+
+<h1>송금대상액 계산기</h1>
+
+<div class="card">
+    <div class="label">송금대상금액</div>
+    <input id="targetAmount" type="number" placeholder="금액 입력">
+</div>
+
+<div class="card" id="moneyList"></div>
+
+<div class="card summary">
+    <div>총액</div>
+    <div id="total" class="total">0원</div>
+    <div id="difference" class="diff">차이 : 0원</div>
+    <div id="status" class="status match">🟢 정확히 일치</div>
+</div>
+
+<button id="resetBtn" class="reset-btn">초기화</button>
+
+<script>
+// 1. 데이터 정의
+const moneyData = [
+    { label: "10만원", value: 100000 },
+    { label: "5만원", value: 50000 },
+    { label: "1만원", value: 10000 },
+    { label: "5천원", value: 5000 },
+    { label: "1천원", value: 1000 },
+    { label: "500원", value: 500 },
+    { label: "100원", value: 100 },
+    { label: "50원", value: 50 },
+    { label: "10원", value: 10 }
+];
+
+// 2. DOM 엘리먼트 캐싱
+const moneyList = document.getElementById("moneyList");
+const targetAmountInput = document.getElementById("targetAmount");
+const totalDisplay = document.getElementById("total");
+const diffDisplay = document.getElementById("difference");
+const statusDisplay = document.getElementById("status");
+const resetBtn = document.getElementById("resetBtn");
+
+// 렌더링 후 캐싱할 input과 sum 요소를 담을 배열
+const qtyInputs = [];
+const sumOutputs = [];
+
+// 3. 리스트 동적 생성 (렌더링 최적화)
+let htmlString = "";
+moneyData.forEach((item, index) => {
+    htmlString += `
+        <div class="money-item">
+            <div class="denom">${item.label}</div>
+            <button class="action-btn minus" data-index="${index}">-</button>
+            <input class="qty" type="number" value="0" min="0" data-index="${index}">
+            <button class="action-btn plus" data-index="${index}">+</button>
+            <div class="amount">0원</div>
+        </div>
+    `;
+});
+moneyList.innerHTML = htmlString; // 단 한 번만 DOM 주입
+
+// 생성된 input과 amount div 요소들을 배열에 캐싱
+moneyList.querySelectorAll('.qty').forEach(el => qtyInputs.push(el));
+moneyList.querySelectorAll('.amount').forEach(el => sumOutputs.push(el));
+
+// 4. 핵심 계산 로직
+function calculate() {
+    let total = 0;
+
+    moneyData.forEach((item, index) => {
+        const qty = Number(qtyInputs[index].value) || 0;
+        const sum = qty * item.value;
+        total += sum;
+        
+        // 메모리에 캐싱된 DOM 요소를 직접 변경하여 성능 최적화
+        sumOutputs[index].textContent = sum.toLocaleString() + "원";
+    });
+
+    totalDisplay.textContent = total.toLocaleString() + "원";
+
+    const target = Number(targetAmountInput.value) || 0;
+    const diff = target - total;
+
+    diffDisplay.textContent = "차이 : " + diff.toLocaleString() + "원";
+
+    // 상태 바 업데이트 최적화 (classList.size 최소화 및 분기 처리)
+    statusDisplay.className = "status"; 
+    if (diff === 0) {
+        statusDisplay.classList.add("match");
+        statusDisplay.textContent = "🟢 정확히 일치";
+    } else if (diff > 0) {
+        statusDisplay.classList.add("short");
+        statusDisplay.textContent = `🔴 ${diff.toLocaleString()}원 부족`;
+    } else {
+        statusDisplay.classList.add("over");
+        statusDisplay.textContent = `🔵 ${Math.abs(diff).toLocaleString()}원 초과`;
+    }
+}
+
+// 5. 이벤트 리스너 바인딩 (HTML-JS 분리)
+moneyList.addEventListener('click', (e) => {
+    if (!e.target.classList.contains('action-btn')) return;
+    
+    const index = Number(e.target.dataset.index);
+    const amount = e.target.classList.contains('plus') ? 1 : -1;
+    const input = qtyInputs[index];
+    
+    let value = (Number(input.value) || 0) + amount;
+    if (value < 0) value = 0;
+    
+    input.value = value;
+    calculate();
+});
+
+moneyList.addEventListener('input', (e) => {
+    if (e.target.classList.contains('qty')) {
+        calculate();
+    }
+});
+
+// 송금 대상 금액을 변경할 때도 실시간 계산 결과가 반영되도록 개선
+targetAmountInput.addEventListener('input', calculate);
+
+resetBtn.addEventListener('click', () => {
+    targetAmountInput.value = "";
+    qtyInputs.forEach(input => input.value = 0);
+    calculate();
+});
+
+// 초기 실행
+calculate();
+</script>
+
+</body>
+</html>
