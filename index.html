@@ -1,7 +1,8 @@
+<!DOCTYPE html>
 <html lang="ko">
 <head>
 <meta charset="UTF-8"> 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>송금대상액 계산기</title>
 
 <meta name="theme-color" content="#9ACD32">
@@ -16,47 +17,59 @@
 
 body {
     background: #f6f7f8;
-    padding: 16px;
-    max-width: 700px;
+    padding: 10px 14px;
+    max-width: 500px; /* 모바일 최적화를 위해 최대 너비 축소 */
     margin: auto;
-}
-
-.card {
-    background: white;
-    border-radius: 18px;
-    padding: 16px;
-    margin-bottom: 14px;
-    box-shadow: 0 2px 12px rgba(0,0,0,.08);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* 위아래 균등 배치 */
 }
 
 h1 {
     text-align: center;
-    margin-bottom: 16px;
+    margin-bottom: 8px;
     color: #4d6b00;
-    font-size: 26px;
+    font-size: 22px; /* 타이틀 크기 축소 */
+}
+
+.card {
+    background: white;
+    border-radius: 14px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.06);
 }
 
 .label {
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 4px;
+    font-size: 14px;
 }
 
 #targetAmount {
     width: 100%;
-    height: 42px;
-    font-size: 22px;
-    padding: 10px;
+    height: 36px; /* 높이 축소 */
+    font-size: 18px;
+    padding: 6px 10px;
     border: 2px solid #cfe58b;
-    border-radius: 12px;
+    border-radius: 10px;
+}
+
+/* 화폐 리스트 카드의 여백 타이트하게 조정 */
+#moneyList.card {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
 }
 
 .money-item {
     display: grid;
-    grid-template-columns: 70px 42px 60px 42px 1fr;
+    grid-template-columns: 55px 34px 48px 34px 1fr; /* 간격 축소 */
     align-items: center;
-    gap: 6px;
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
+    gap: 4px;
+    padding: 4px 0; /* 위아래 패딩 대폭 축소 */
+    border-bottom: 1px solid #f0f0f0;
 }
 
 .money-item:last-child {
@@ -65,56 +78,65 @@ h1 {
 
 .denom {
     font-weight: 700;
-    font-size: 15px;
+    font-size: 14px;
 }
 
 .action-btn {
-    width: 32px;
-    height: 32px;
+    width: 28px; /* 버튼 크기 축소 */
+    height: 28px;
     border: none;
-    border-radius: 10px;
+    border-radius: 8px;
     background: #9ACD32;
     color: white;
-    font-size: 20px;
+    font-size: 16px;
     font-weight: 700;
-    cursor: pointer; /* 클릭 가능한 요소임을 표시 */
+    cursor: pointer;
 }
 
 .qty {
     width: 100%;
-    height: 42px;
+    height: 32px; /* 인풋 높이 축소 */
     text-align: center;
-    font-size: 18px;
+    font-size: 15px;
     border: 1px solid #ccc;
-    border-radius: 10px;
+    border-radius: 8px;
 }
 
 .amount {
     text-align: right;
     font-weight: 700;
-    font-size: 15px;
+    font-size: 14px;
 }
 
 .summary {
     text-align: center;
+    padding: 8px 12px;
+    margin-bottom: 8px;
+}
+
+.summary > div:first-child {
+    font-size: 13px;
+    color: #666;
 }
 
 .total {
-    font-size: 34px;
+    font-size: 26px; /* 총액 글자 크기 축소 */
     font-weight: 800;
     color: #4d6b00;
+    line-height: 1.2;
 }
 
 .diff {
-    margin-top: 8px;
-    font-size: 18px;
+    margin-top: 2px;
+    font-size: 15px;
 }
 
 .status {
-    margin-top: 10px;
-    padding: 12px;
-    border-radius: 12px;
+    margin-top: 6px;
+    padding: 6px; /* 상태창 패딩 축소 */
+    border-radius: 8px;
     font-weight: 700;
+    font-size: 14px;
 }
 
 .match { background: #e8f5d0; color: #4d6b00; }
@@ -123,49 +145,50 @@ h1 {
 
 .reset-btn {
     width: 100%;
-    height: 52px;
+    height: 44px; /* 버튼 높이 축소 */
     border: none;
-    border-radius: 12px;
+    border-radius: 10px;
     background: #4d6b00;
     color: white;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     cursor: pointer;
+    margin-top: auto; /* 최하단 고정 지원 */
 }
 
-@media(max-width: 430px) {
+/* 초소형 화면 대응 */
+@media(max-width: 360px) {
     .money-item {
-        grid-template-columns: 55px 36px 52px 36px 1fr;
-        gap: 4px;
+        grid-template-columns: 50px 28px 40px 28px 1fr;
     }
-    .denom { font-size: 13px; }
-    .amount { font-size: 13px; }
+    .denom, .amount { font-size: 12px; }
 }
 </style>
 </head>
 
 <body>
 
-<h1>송금대상액 계산기</h1>
+<div>
+    <h1>송금대상액 계산기</h1>
 
-<div class="card">
-    <div class="label">송금대상금액</div>
-    <input id="targetAmount" type="number" placeholder="금액 입력">
-</div>
+    <div class="card">
+        <div class="label">송금대상금액</div>
+        <input id="targetAmount" type="number" placeholder="금액 입력">
+    </div>
 
-<div class="card" id="moneyList"></div>
+    <div class="card" id="moneyList"></div>
 
-<div class="card summary">
-    <div>총액</div>
-    <div id="total" class="total">0원</div>
-    <div id="difference" class="diff">차이 : 0원</div>
-    <div id="status" class="status match">🟢 정확히 일치</div>
+    <div class="card summary">
+        <div>총액</div>
+        <div id="total" class="total">0원</div>
+        <div id="difference" class="diff">차이 : 0원</div>
+        <div id="status" class="status match">🟢 정확히 일치</div>
+    </div>
 </div>
 
 <button id="resetBtn" class="reset-btn">초기화</button>
 
 <script>
-// 1. 데이터 정의
 const moneyData = [
     { label: "10만원", value: 100000 },
     { label: "5만원", value: 50000 },
@@ -178,7 +201,6 @@ const moneyData = [
     { label: "10원", value: 10 }
 ];
 
-// 2. DOM 엘리먼트 캐싱
 const moneyList = document.getElementById("moneyList");
 const targetAmountInput = document.getElementById("targetAmount");
 const totalDisplay = document.getElementById("total");
@@ -186,11 +208,9 @@ const diffDisplay = document.getElementById("difference");
 const statusDisplay = document.getElementById("status");
 const resetBtn = document.getElementById("resetBtn");
 
-// 렌더링 후 캐싱할 input과 sum 요소를 담을 배열
 const qtyInputs = [];
 const sumOutputs = [];
 
-// 3. 리스트 동적 생성 (렌더링 최적화)
 let htmlString = "";
 moneyData.forEach((item, index) => {
     htmlString += `
@@ -203,13 +223,11 @@ moneyData.forEach((item, index) => {
         </div>
     `;
 });
-moneyList.innerHTML = htmlString; // 단 한 번만 DOM 주입
+moneyList.innerHTML = htmlString;
 
-// 생성된 input과 amount div 요소들을 배열에 캐싱
 moneyList.querySelectorAll('.qty').forEach(el => qtyInputs.push(el));
 moneyList.querySelectorAll('.amount').forEach(el => sumOutputs.push(el));
 
-// 4. 핵심 계산 로직
 function calculate() {
     let total = 0;
 
@@ -218,7 +236,6 @@ function calculate() {
         const sum = qty * item.value;
         total += sum;
         
-        // 메모리에 캐싱된 DOM 요소를 직접 변경하여 성능 최적화
         sumOutputs[index].textContent = sum.toLocaleString() + "원";
     });
 
@@ -229,7 +246,6 @@ function calculate() {
 
     diffDisplay.textContent = "차이 : " + diff.toLocaleString() + "원";
 
-    // 상태 바 업데이트 최적화 (classList.size 최소화 및 분기 처리)
     statusDisplay.className = "status"; 
     if (diff === 0) {
         statusDisplay.classList.add("match");
@@ -243,7 +259,6 @@ function calculate() {
     }
 }
 
-// 5. 이벤트 리스너 바인딩 (HTML-JS 분리)
 moneyList.addEventListener('click', (e) => {
     if (!e.target.classList.contains('action-btn')) return;
     
@@ -264,7 +279,6 @@ moneyList.addEventListener('input', (e) => {
     }
 });
 
-// 송금 대상 금액을 변경할 때도 실시간 계산 결과가 반영되도록 개선
 targetAmountInput.addEventListener('input', calculate);
 
 resetBtn.addEventListener('click', () => {
@@ -273,7 +287,6 @@ resetBtn.addEventListener('click', () => {
     calculate();
 });
 
-// 초기 실행
 calculate();
 </script>
 
